@@ -108,6 +108,8 @@ public class NovaComputeServiceAdapter implements
       options.metadata(metadataAndTagsAsCommaDelimitedValue(template.getOptions()));
       if (templateOptions.getSecurityGroupNames().isPresent())
          options.securityGroupNames(templateOptions.getSecurityGroupNames().get());
+      if (templateOptions.getNetworks().isPresent())
+          options.networks(templateOptions.getNetworks().get());
       options.userData(templateOptions.getUserData());
 
       Optional<String> privateKey = Optional.absent();

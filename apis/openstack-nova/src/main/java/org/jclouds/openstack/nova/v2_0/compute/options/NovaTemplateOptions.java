@@ -69,6 +69,8 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
          eTo.autoAssignFloatingIp(shouldAutoAssignFloatingIp());
          if (getSecurityGroupNames().isPresent())
             eTo.securityGroupNames(getSecurityGroupNames().get());
+         if (getNetworks().isPresent())
+            eTo.networks(getNetworks().get());
          eTo.generateKeyPair(shouldGenerateKeyPair());
          eTo.keyPairName(getKeyPairName());
          if (getUserData() != null) {
@@ -79,6 +81,7 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
 
    protected boolean autoAssignFloatingIp = false;
    protected Optional<Set<String>> securityGroupNames = Optional.absent();
+   protected Optional<Set<Map<String, String>>> networks = Optional.absent();
    protected boolean generateKeyPair = false;
    protected String keyPairName;
    protected byte[] userData;
@@ -92,6 +95,7 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
       NovaTemplateOptions that = NovaTemplateOptions.class.cast(o);
       return super.equals(that) && equal(this.autoAssignFloatingIp, that.autoAssignFloatingIp)
             && equal(this.securityGroupNames, that.securityGroupNames)
+            && equal(this.networks, that.networks)
             && equal(this.generateKeyPair, that.generateKeyPair)
             && equal(this.keyPairName, that.keyPairName)
             && Arrays.equals(this.userData, that.userData);
@@ -99,7 +103,7 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
 
    @Override
    public int hashCode() {
-      return Objects.hashCode(super.hashCode(), autoAssignFloatingIp, securityGroupNames, generateKeyPair, keyPairName, userData);
+      return Objects.hashCode(super.hashCode(), autoAssignFloatingIp, securityGroupNames, networks, generateKeyPair, keyPairName, userData);
    }
 
    @Override
@@ -109,6 +113,8 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
          toString.add("autoAssignFloatingIp", autoAssignFloatingIp);
       if (securityGroupNames.isPresent())
          toString.add("securityGroupNames", securityGroupNames.get());
+      if (networks.isPresent())
+         toString.add("networks", networks.get());
       if (generateKeyPair)
          toString.add("generateKeyPair", generateKeyPair);
       toString.add("keyPairName", keyPairName);
@@ -161,6 +167,14 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
    }
 
    /**
+    * @see org.jclouds.openstack.nova.v2_0.options.CreateServerOptions#getNetworks
+    */
+   public NovaTemplateOptions networks(Iterable<Map<String, String>> networks) {
+      this.networks = Optional.<Set<Map<String, String>>> of(ImmutableSet.copyOf(networks));
+      return this;
+   }
+
+   /**
     * <h3>Note</h3>
     * 
     * This requires that {@link NovaApi#getExtensionForZone(String)} to return
@@ -200,6 +214,15 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
     */
    public Optional<Set<String>> getSecurityGroupNames() {
       return securityGroupNames;
+   }
+
+   /**
+    * Specifies network options to run instances with.
+    *
+    * @see org.jclouds.openstack.nova.v2_0.options.CreateServerOptions#getNetworks
+    */
+   public Optional<Set<Map<String, String>>> getNetworks() {
+      return networks;
    }
 
    public byte[] getUserData() {
@@ -243,6 +266,14 @@ public class NovaTemplateOptions extends TemplateOptions implements Cloneable {
       public static NovaTemplateOptions securityGroupNames(Iterable<String> groupNames) {
          NovaTemplateOptions options = new NovaTemplateOptions();
          return NovaTemplateOptions.class.cast(options.securityGroupNames(groupNames));
+      }
+
+      /**
+       * @see org.jclouds.openstack.nova.v2_0.options.CreateServerOptions#getNeworks
+       */
+      public static NovaTemplateOptions networks(Iterable<Map<String, String>> networks) {
+         NovaTemplateOptions options = new NovaTemplateOptions();
+         return NovaTemplateOptions.class.cast(options.networks(networks));
       }
 
       // methods that only facilitate returning the correct object type

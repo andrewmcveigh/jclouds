@@ -364,6 +364,8 @@ Here's an example of creating and running a small linux node in the group webser
          :unmap-device-named
        ;; cloudstack ec2
          :key-pair
+       ;; openstack-nova
+         :key-pair-name :auto-assign-floating-ip :networks
        ;; aws-ec2
          :placement-group :subnet-id :spot-price :spot-options
        ;; cloudstack aws-ec2

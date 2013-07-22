@@ -108,6 +108,7 @@ public class CreateServerOptions implements MapBinder {
    private String keyName;
    private String adminPass;
    private Set<String> securityGroupNames = ImmutableSet.of();
+   private Set<Map<String, String>> networks = ImmutableSet.of();
    private Map<String, String> metadata = ImmutableMap.of();
    private List<File> personality = Lists.newArrayList();
    private byte[] userData;
@@ -119,8 +120,11 @@ public class CreateServerOptions implements MapBinder {
       }
       if (object instanceof CreateServerOptions) {
          final CreateServerOptions other = CreateServerOptions.class.cast(object);
-         return equal(keyName, other.keyName) && equal(securityGroupNames, other.securityGroupNames)
-                  && equal(metadata, other.metadata) && equal(personality, other.personality)
+         return equal(keyName, other.keyName)
+                  && equal(securityGroupNames, other.securityGroupNames)
+                  && equal(networks, other.networks)
+                  && equal(metadata, other.metadata)
+                  && equal(personality, other.personality)
                   && equal(adminPass, other.adminPass);
       } else {
          return false;
@@ -129,7 +133,8 @@ public class CreateServerOptions implements MapBinder {
 
    @Override
    public int hashCode() {
-      return Objects.hashCode(keyName, securityGroupNames, metadata, personality, adminPass);
+      return Objects.hashCode(keyName, securityGroupNames, networks,
+                              metadata, personality, adminPass);
    }
 
    protected ToStringHelper string() {
@@ -137,6 +142,8 @@ public class CreateServerOptions implements MapBinder {
       toString.add("keyName", keyName);
       if (securityGroupNames.size() > 0)
          toString.add("securityGroupNames", securityGroupNames);
+      if (networks.size() > 0)
+         toString.add("networks", networks);
       if (metadata.size() > 0)
          toString.add("metadata", metadata);
       if (personality.size() > 0)
@@ -163,6 +170,7 @@ public class CreateServerOptions implements MapBinder {
       @Named("security_groups")
       Set<NamedThingy> securityGroupNames;
       String user_data;
+      Set<Map<String, String>> networks;
 
       private ServerRequest(String name, String imageRef, String flavorRef) {
          this.name = name;
@@ -190,6 +198,12 @@ public class CreateServerOptions implements MapBinder {
          for (String groupName : securityGroupNames) {
             server.securityGroupNames.add(new NamedThingy(groupName));
          }
+      }
+      if (networks.size() > 0) {
+          server.networks = Sets.newLinkedHashSet();
+          for (Map<String, String> network : networks) {
+              server.networks.add(network);
+          }
       }
       if (adminPass != null) {
          server.adminPass = adminPass;
@@ -323,6 +337,28 @@ public class CreateServerOptions implements MapBinder {
       return this;
    }
    
+   /**
+    *
+    * Network interfaces the user specified to run servers with. All K, Vs are
+    * optional.
+    *
+    * Possible options (Map<String, String>):
+    *   "uuid",     "b5967f0b-7fd5-45e2-9219-7ceecf9dd1d8"
+    *   "fixed_ip", "10.10.4.100"
+    *   "port",     "b0188120-4a1c-4561-98cf-b8b72de91640"
+    */
+   public Set<Map<String, String>> getNetworks() {
+      return networks;
+   }
+
+   /**
+    * @see #getNetworks
+    */
+   public CreateServerOptions networks(Iterable<Map<String, String>> networks) {
+      this.networks = ImmutableSet.copyOf(networks);
+      return this;
+   }
+
    public static class Builder {
 
       /**
@@ -368,6 +404,14 @@ public class CreateServerOptions implements MapBinder {
       public static CreateServerOptions securityGroupNames(Iterable<String> groupNames) {
          CreateServerOptions options = new CreateServerOptions();
          return CreateServerOptions.class.cast(options.securityGroupNames(groupNames));
+      }
+
+      /**
+       * @see CreateServerOptions#getNetworks
+       */
+      public static CreateServerOptions networks(Iterable<Map<String, String>> networks) {
+         CreateServerOptions options = new CreateServerOptions();
+         return CreateServerOptions.class.cast(options.networks(networks));
       }
    }
 
